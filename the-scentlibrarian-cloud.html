@@ -1,0 +1,2992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>the.scentlibrarian — A Personal Olfactory Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #f0e7d6;
+    --bg-warm: #e6dac4;
+    --surface: #faf3e6;
+    --surface-elevated: #fdf8ed;
+    --paper: #f7eedb;
+    --ink: #2b1810;
+    --ink-soft: #5c4a3e;
+    --ink-faint: #8a7a6c;
+    --accent: #8b4a2b;
+    --accent-deep: #6e3a20;
+    --gold: #a8865f;
+    --gold-bright: #c4a373;
+    --gold-light: #d4b896;
+    --gold-faint: #e8dcc5;
+    --gold-pale: #f1e8d3;
+    --border: #cdb89a;
+    --border-soft: #ddc9a8;
+    --border-faint: #ebdfc7;
+    --burgundy: #6b2c2c;
+    --burgundy-deep: #4a1f1f;
+    --success: #4a6b3a;
+    --warning: #b8782a;
+    --shadow-soft: 0 1px 2px rgba(43, 24, 16, 0.05), 0 4px 16px rgba(43, 24, 16, 0.07);
+    --shadow-lift: 0 4px 12px rgba(43, 24, 16, 0.10), 0 24px 48px rgba(43, 24, 16, 0.12);
+    --shadow-deep: 0 2px 4px rgba(43, 24, 16, 0.08), 0 12px 32px rgba(43, 24, 16, 0.16), inset 0 0 0 1px rgba(168, 134, 95, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    position: relative;
+    background-image:
+      radial-gradient(at 15% 8%, rgba(168, 134, 95, 0.12) 0px, transparent 50%),
+      radial-gradient(at 85% 92%, rgba(139, 74, 43, 0.10) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, rgba(255, 255, 255, 0.3) 0px, transparent 60%);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.45;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23a8865f' stroke-width='0.4' opacity='0.35'%3E%3Cpath d='M40 8 Q48 20 40 32 Q32 20 40 8 Z'/%3E%3Cpath d='M40 48 Q48 60 40 72 Q32 60 40 48 Z'/%3E%3Cpath d='M8 40 Q20 48 32 40 Q20 32 8 40 Z'/%3E%3Cpath d='M48 40 Q60 48 72 40 Q60 32 48 40 Z'/%3E%3Ccircle cx='40' cy='40' r='1.2' fill='%23a8865f' opacity='0.5'/%3E%3Ccircle cx='0' cy='0' r='1' fill='%23a8865f' opacity='0.4'/%3E%3Ccircle cx='80' cy='0' r='1' fill='%23a8865f' opacity='0.4'/%3E%3Ccircle cx='0' cy='80' r='1' fill='%23a8865f' opacity='0.4'/%3E%3Ccircle cx='80' cy='80' r='1' fill='%23a8865f' opacity='0.4'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.22 0 0 0 0 0.12 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  main, header, footer { position: relative; z-index: 1; }
+
+  /* ───────────────── MASTHEAD ───────────────── */
+  .masthead {
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 3rem 2rem;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--paper) 100%);
+    position: relative;
+    box-shadow: 0 1px 0 var(--gold-faint), 0 4px 24px rgba(43, 24, 16, 0.04);
+  }
+
+  .masthead::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: repeating-linear-gradient(90deg, var(--gold) 0 8px, transparent 8px 12px), linear-gradient(180deg, var(--accent), var(--gold));
+  }
+
+  .masthead::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--gold) 30%, var(--accent) 50%, var(--gold) 70%, transparent 100%);
+  }
+
+  .masthead-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 1.25rem;
+    font-weight: 500;
+    padding: 0.5rem 0;
+    border-bottom: 1px dotted var(--border);
+    gap: 1rem;
+  }
+
+  .masthead-top .vol { color: var(--accent); font-weight: 600; }
+  .masthead-top .date::before { content: '✦  '; color: var(--gold); }
+  .masthead-top .roman {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+  }
+
+  /* Sync status indicator */
+  .sync-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+  }
+
+  .sync-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ink-faint);
+    transition: background 0.3s ease;
+  }
+
+  .sync-indicator.connected .sync-dot {
+    background: var(--success);
+    box-shadow: 0 0 0 0 var(--success);
+    animation: pulse 2s infinite;
+  }
+
+  .sync-indicator.syncing .sync-dot {
+    background: var(--warning);
+    animation: pulse-fast 0.8s infinite;
+  }
+
+  .sync-indicator.error .sync-dot { background: var(--burgundy); }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(74, 107, 58, 0.5); }
+    70% { box-shadow: 0 0 0 8px rgba(74, 107, 58, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(74, 107, 58, 0); }
+  }
+
+  @keyframes pulse-fast {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .title-block {
+    text-align: center;
+    padding: 1.5rem 2rem 1rem;
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .title-block::before, .title-block::after,
+  .corner-bl, .corner-br {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: 1.5px solid var(--gold);
+    opacity: 0.6;
+  }
+
+  .title-block::before { top: 0; left: 0; border-right: none; border-bottom: none; }
+  .title-block::after { top: 0; right: 0; border-left: none; border-bottom: none; }
+  .corner-bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+  .corner-br { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+  .brand-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.5rem, 6vw, 4.75rem);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    color: var(--ink);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  .brand-title .dot { color: var(--accent); font-style: italic; }
+  .brand-title .lib { font-style: italic; font-weight: 400; color: var(--accent-deep); }
+
+  .tagline {
+    margin-top: 0.5rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--ink-soft);
+  }
+
+  .ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1rem 0 0.5rem;
+    color: var(--gold);
+  }
+
+  .ornament-line {
+    height: 1px;
+    width: 100px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  /* ───────────────── SETUP BANNER ───────────────── */
+  .setup-banner {
+    background: linear-gradient(180deg, var(--burgundy) 0%, var(--burgundy-deep) 100%);
+    color: var(--bg);
+    padding: 1.5rem 2rem;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    border-bottom: 1px solid var(--gold);
+  }
+
+  .setup-banner h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--gold-light);
+  }
+
+  .setup-banner p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  .setup-banner code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    font-size: 0.85rem;
+    color: var(--gold-light);
+  }
+
+  /* ───────────────── CONTROL BAR ───────────────── */
+  .control-bar {
+    max-width: 1400px;
+    margin: 2.5rem auto 1.5rem;
+    padding: 0 3rem;
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .search-wrapper { position: relative; }
+
+  .search-wrapper svg.search-icon {
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-faint);
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 1rem 1.25rem 1rem 3rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--ink);
+    background: linear-gradient(var(--surface-elevated), var(--surface-elevated)) padding-box,
+                linear-gradient(135deg, var(--gold-light), var(--gold)) border-box;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .search-input::placeholder { color: var(--ink-faint); }
+
+  .search-input:focus {
+    outline: none;
+    background: linear-gradient(var(--surface-elevated), var(--surface-elevated)) padding-box,
+                linear-gradient(135deg, var(--accent), var(--accent-deep)) border-box;
+    box-shadow: 0 0 0 3px rgba(139, 74, 43, 0.08), var(--shadow-soft);
+  }
+
+  .btn {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 1rem 1.5rem;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--bg);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-soft);
+    position: relative;
+  }
+
+  .btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--border);
+    box-shadow: none;
+  }
+
+  .btn-ghost:hover {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+
+  .btn-icon {
+    background: var(--surface-elevated);
+    color: var(--ink);
+    border-color: var(--border);
+    padding: 1rem;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .btn-icon:hover {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--burgundy);
+    border-color: var(--burgundy);
+    box-shadow: none;
+  }
+
+  .btn-danger:hover { background: var(--burgundy); color: var(--bg); }
+
+  /* ───────────────── STATS STRIP ───────────────── */
+  .stats-strip {
+    max-width: 1400px;
+    margin: 0 auto 2rem;
+    padding: 1.5rem 3rem;
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    position: relative;
+  }
+
+  .stats-strip::before, .stats-strip::after {
+    content: '✦';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+    font-size: 0.7rem;
+  }
+  .stats-strip::before { left: 2rem; }
+  .stats-strip::after { right: 2rem; }
+
+  .stat { text-align: center; position: relative; }
+
+  .stat:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 30px;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, var(--border), transparent);
+  }
+
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.25rem;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  .stat-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 0.5rem;
+    font-weight: 500;
+  }
+
+  /* ───────────────── SORT BAR ───────────────── */
+  .sort-bar {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 3rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .section-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.65rem;
+    font-style: italic;
+    color: var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  .section-label::before {
+    content: '❦';
+    color: var(--gold);
+    font-style: normal;
+    font-size: 1.2rem;
+  }
+
+  .section-label .count {
+    color: var(--ink-faint);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-style: normal;
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+  }
+
+  .sort-select {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0.4rem 1.5rem 0.4rem 0;
+    cursor: pointer;
+    font-weight: 500;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%235c4a3e%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0 center;
+    background-size: 8px;
+  }
+
+  /* ───────────────── LIBRARY GRID ───────────────── */
+  .library {
+    max-width: 1400px;
+    margin: 2rem auto 4rem;
+    padding: 0 3rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 2rem;
+  }
+
+  .perfume-card {
+    background: linear-gradient(135deg, var(--surface-elevated) 0%, var(--paper) 100%);
+    border: 1px solid var(--border-soft);
+    padding: 0;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    min-height: 440px;
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+  }
+
+  .perfume-card::before {
+    content: '';
+    position: absolute;
+    top: 10px; left: 10px; right: 10px; bottom: 10px;
+    border: 1px solid var(--gold-faint);
+    pointer-events: none;
+    transition: border-color 0.4s ease;
+    z-index: 1;
+  }
+
+  .perfume-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.6;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='c'%3E%3CfeTurbulence baseFrequency='0.95' numOctaves='1'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.35 0 0 0 0 0.2 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23c)'/%3E%3C/svg%3E");
+  }
+
+  .perfume-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lift);
+    border-color: var(--gold-light);
+  }
+
+  .perfume-card:hover::before { border-color: var(--gold-bright); }
+
+  .card-photo {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(135deg, var(--gold-pale), var(--surface));
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .card-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: saturate(0.95) contrast(1.02);
+    transition: transform 0.5s ease;
+  }
+
+  .perfume-card:hover .card-photo img { transform: scale(1.05); }
+
+  .card-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(43, 24, 16, 0.15));
+    pointer-events: none;
+  }
+
+  .card-body {
+    padding: 1.75rem 1.75rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 2;
+  }
+
+  .card-corner {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    color: var(--gold);
+    opacity: 0.85;
+    z-index: 3;
+  }
+
+  .card-corner.tl { top: 14px; left: 14px; }
+  .card-corner.tr { top: 14px; right: 14px; transform: scaleX(-1); }
+  .card-corner.bl { bottom: 14px; left: 14px; transform: scaleY(-1); }
+  .card-corner.br { bottom: 14px; right: 14px; transform: scale(-1, -1); }
+
+  .wax-seal {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 60px;
+    height: 60px;
+    z-index: 4;
+    filter: drop-shadow(0 2px 4px rgba(43, 24, 16, 0.3));
+  }
+
+  .perfume-card.no-photo .wax-seal { top: 16px; }
+  .perfume-card.has-photo .wax-seal { top: 16px; }
+
+  .card-index {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .card-index::before, .card-index::after {
+    content: '';
+    flex: 0 0 20px;
+    height: 1px;
+    background: var(--gold-light);
+  }
+
+  .card-index::after { flex: 1; }
+
+  .card-brand {
+    font-size: 0.68rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    padding-right: 60px;
+  }
+
+  .card-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.85rem;
+    font-weight: 500;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+
+  .card-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0 1.25rem;
+    color: var(--gold);
+  }
+
+  .card-divider::before { content: ''; flex: 0 0 20px; height: 1px; background: var(--gold); }
+  .card-divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); }
+  .card-divider-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
+  .card-notes-mini {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    margin-bottom: 1.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-metrics {
+    margin-top: auto;
+    padding-top: 1.25rem;
+    border-top: 1px dotted var(--border);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .metric-mini { text-align: center; position: relative; }
+
+  .metric-mini:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 10%;
+    bottom: 10%;
+    width: 1px;
+    background: var(--border-faint);
+  }
+
+  .metric-mini-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .metric-mini-num .total {
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    font-weight: 400;
+  }
+
+  .metric-mini-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 0.35rem;
+    font-weight: 600;
+  }
+
+  /* ───────────────── EMPTY STATE ───────────────── */
+  .empty-state {
+    max-width: 640px;
+    margin: 4rem auto;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+  }
+
+  .empty-state-frame {
+    position: absolute;
+    inset: 2rem;
+    border: 1px solid var(--gold-light);
+    pointer-events: none;
+  }
+
+  .empty-state-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 5rem;
+    color: var(--gold-light);
+    line-height: 1;
+    margin-bottom: 1rem;
+    font-style: italic;
+  }
+
+  .empty-state h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.25rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    font-style: italic;
+  }
+
+  .empty-state p {
+    color: var(--ink-soft);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    font-style: italic;
+    max-width: 460px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ───────────────── MODAL ───────────────── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(43, 24, 16, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 100;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    overflow-y: auto;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal {
+    background: linear-gradient(180deg, var(--surface) 0%, var(--paper) 100%);
+    width: 100%;
+    max-width: 760px;
+    padding: 3.5rem 3.5rem 3rem;
+    position: relative;
+    border: 1px solid var(--gold-light);
+    transform: translateY(20px) scale(0.98);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-deep);
+  }
+
+  .modal::before {
+    content: '';
+    position: absolute;
+    inset: 14px;
+    border: 1px solid var(--gold-faint);
+    pointer-events: none;
+  }
+
+  .modal-overlay.active .modal { transform: translateY(0) scale(1); }
+
+  .modal-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    transition: all 0.2s ease;
+    z-index: 5;
+  }
+
+  .modal-close:hover {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+    transform: rotate(90deg);
+  }
+
+  .modal-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-soft);
+    position: relative;
+  }
+
+  .modal-header::after {
+    content: '✦';
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface);
+    color: var(--gold);
+    padding: 0 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  .modal-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.5rem;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+
+  .modal-title .accent { font-style: italic; color: var(--accent); }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-field { display: flex; flex-direction: column; }
+  .form-field.full { grid-column: 1 / -1; }
+
+  .form-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-label::before {
+    content: '';
+    width: 6px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .form-label .hint {
+    text-transform: none;
+    letter-spacing: 0;
+    font-style: italic;
+    color: var(--ink-faint);
+    margin-left: auto;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+  }
+
+  .form-input, .form-textarea {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    padding: 0.85rem 1rem;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+    width: 100%;
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 130px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+
+  .form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(139, 74, 43, 0.1);
+    background: var(--surface);
+  }
+
+  /* Photo upload */
+  .photo-upload-area {
+    background: linear-gradient(180deg, var(--gold-pale) 0%, var(--surface-elevated) 100%);
+    border: 1px dashed var(--gold);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    position: relative;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+  }
+
+  .photo-upload-area:hover {
+    border-color: var(--accent);
+    background: linear-gradient(180deg, var(--gold-pale) 0%, var(--paper) 100%);
+  }
+
+  .photo-upload-area.has-image { padding: 1rem; }
+
+  .photo-preview {
+    max-width: 200px;
+    max-height: 200px;
+    border: 1px solid var(--gold-light);
+    margin: 0 auto 1rem;
+    display: block;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .photo-upload-label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    border: 1px solid var(--accent);
+    background: var(--surface);
+    transition: all 0.2s ease;
+  }
+
+  .photo-upload-label:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .photo-upload-hint {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--ink-faint);
+    margin-top: 0.5rem;
+  }
+
+  .photo-remove-btn {
+    background: transparent;
+    border: 1px solid var(--burgundy);
+    color: var(--burgundy);
+    padding: 0.4rem 1rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    font-weight: 600;
+  }
+
+  .photo-remove-btn:hover {
+    background: var(--burgundy);
+    color: var(--bg);
+  }
+
+  /* Notes section */
+  .notes-section {
+    background: linear-gradient(180deg, var(--gold-pale) 0%, var(--surface-elevated) 100%);
+    border: 1px solid var(--gold-faint);
+    padding: 1.75rem 1.5rem 1.25rem;
+    margin-bottom: 1.5rem;
+    border-radius: 2px;
+    position: relative;
+  }
+
+  .notes-section::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px dotted var(--gold-light);
+    pointer-events: none;
+  }
+
+  .notes-section-header {
+    text-align: center;
+    margin-bottom: 1.25rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .notes-section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.4rem;
+    color: var(--ink);
+    margin-bottom: 0.25rem;
+  }
+
+  .notes-section-sub {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .note-tier { margin-bottom: 1rem; position: relative; z-index: 1; }
+  .note-tier:last-child { margin-bottom: 0; }
+
+  .tier-marker {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--gold);
+    color: var(--accent);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    text-align: center;
+    line-height: 16px;
+    margin-right: 0.5rem;
+    background: var(--surface);
+  }
+
+  /* Metric inputs */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .metric-input {
+    background: linear-gradient(180deg, var(--surface-elevated), var(--paper));
+    border: 1px solid var(--border);
+    padding: 1.5rem 1rem 1.25rem;
+    text-align: center;
+    border-radius: 2px;
+    position: relative;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .metric-input::before {
+    content: '';
+    position: absolute;
+    top: 6px; left: 6px; right: 6px; bottom: 6px;
+    border: 1px solid var(--border-faint);
+    pointer-events: none;
+  }
+
+  .metric-input label {
+    display: block;
+    font-size: 0.62rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    position: relative;
+  }
+
+  .metric-value-display {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.5rem;
+    font-weight: 500;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  .metric-value-display .max {
+    font-size: 0.95rem;
+    color: var(--ink-faint);
+  }
+
+  .metric-slider {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 2px;
+    background: var(--border);
+    outline: none;
+    margin-top: 0.5rem;
+    cursor: pointer;
+  }
+
+  .metric-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  .metric-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  .metric-descriptor {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    margin-top: 0.5rem;
+    min-height: 1.2em;
+  }
+
+  .rating-input {
+    background: linear-gradient(180deg, var(--gold-pale), var(--surface-elevated));
+    border-color: var(--gold-light);
+  }
+
+  .rating-input .metric-value-display { color: var(--burgundy); }
+
+  .modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-soft);
+    position: relative;
+  }
+
+  .modal-actions::before {
+    content: '✦';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--paper);
+    color: var(--gold);
+    padding: 0 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  /* ───────────────── DETAIL VIEW ───────────────── */
+  .detail-card {
+    background: linear-gradient(180deg, var(--surface) 0%, var(--paper) 100%);
+    width: 100%;
+    max-width: 820px;
+    padding: 4rem 4rem 3.5rem;
+    position: relative;
+    border: 1px solid var(--gold-light);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+    box-shadow: var(--shadow-deep);
+  }
+
+  .modal-overlay.active .detail-card { transform: translateY(0); }
+
+  .detail-card::before {
+    content: '';
+    position: absolute;
+    inset: 18px;
+    border: 1px solid var(--gold-faint);
+    pointer-events: none;
+  }
+
+  .detail-corner {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    color: var(--gold);
+    z-index: 2;
+  }
+
+  .detail-corner.tl { top: 22px; left: 22px; }
+  .detail-corner.tr { top: 22px; right: 22px; transform: scaleX(-1); }
+  .detail-corner.bl { bottom: 22px; left: 22px; transform: scaleY(-1); }
+  .detail-corner.br { bottom: 22px; right: 22px; transform: scale(-1, -1); }
+
+  .detail-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    transition: all 0.2s ease;
+    z-index: 5;
+  }
+
+  .detail-close:hover {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+    transform: rotate(90deg);
+  }
+
+  .detail-photo {
+    width: 100%;
+    max-height: 280px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 2rem;
+    border: 1px solid var(--gold-light);
+    box-shadow: var(--shadow-lift);
+    background: var(--surface-elevated);
+  }
+
+  .detail-eyebrow {
+    text-align: center;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    font-weight: 600;
+    position: relative;
+  }
+
+  .detail-eyebrow::before, .detail-eyebrow::after {
+    content: '';
+    display: inline-block;
+    width: 30px;
+    height: 1px;
+    background: var(--gold);
+    vertical-align: middle;
+    margin: 0 0.75rem;
+  }
+
+  .detail-brand {
+    text-align: center;
+    font-size: 0.9rem;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  .detail-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  .detail-ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1.5rem 0 2.5rem;
+  }
+
+  .detail-ornament-line {
+    height: 1px;
+    width: 100px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .pyramid {
+    background: linear-gradient(180deg, var(--gold-pale) 0%, var(--surface-elevated) 100%);
+    border-top: 1px solid var(--gold);
+    border-bottom: 1px solid var(--gold);
+    padding: 2rem;
+    margin: 2rem -1rem;
+    position: relative;
+  }
+
+  .pyramid::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-top: 1px dotted var(--gold-light);
+    border-bottom: 1px dotted var(--gold-light);
+    pointer-events: none;
+  }
+
+  .pyramid-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .pyramid-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    color: var(--ink);
+    margin-bottom: 0.25rem;
+  }
+
+  .pyramid-sub {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .pyramid-shape {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .pyramid-tier {
+    text-align: center;
+    padding: 1rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--gold-light);
+    transition: all 0.3s ease;
+  }
+
+  .pyramid-tier:hover {
+    background: var(--paper);
+    border-color: var(--gold);
+    transform: scale(1.02);
+  }
+
+  .pyramid-tier.top { width: 60%; }
+  .pyramid-tier.middle { width: 80%; }
+  .pyramid-tier.base { width: 100%; }
+
+  .tier-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+
+  .tier-notes {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+
+  .detail-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .detail-metric {
+    text-align: center;
+    padding: 1.75rem 1rem 1.25rem;
+    background: linear-gradient(180deg, var(--surface-elevated), var(--paper));
+    border: 1px solid var(--border-soft);
+    position: relative;
+  }
+
+  .detail-metric::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 1px solid var(--border-faint);
+    pointer-events: none;
+  }
+
+  .detail-metric-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.75rem;
+    font-weight: 500;
+    color: var(--accent);
+    line-height: 1;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  .detail-metric-num .out-of {
+    font-size: 1.1rem;
+    color: var(--ink-faint);
+  }
+
+  .detail-metric-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 0.5rem;
+    font-weight: 600;
+  }
+
+  .detail-metric-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--ink-faint);
+    margin-top: 0.25rem;
+  }
+
+  .rating-hero {
+    text-align: center;
+    padding: 2rem 1rem;
+    margin: 1.5rem 0;
+    background: radial-gradient(ellipse at center, var(--gold-pale) 0%, var(--surface-elevated) 80%);
+    border: 1px solid var(--gold-light);
+    position: relative;
+  }
+
+  .rating-hero::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px dotted var(--gold);
+    pointer-events: none;
+  }
+
+  .rating-hero-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+
+  .rating-hero-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--ink);
+  }
+
+  .review-block {
+    margin: 2.5rem 0 2rem;
+    padding: 2.5rem 2rem 2rem;
+    background: linear-gradient(180deg, var(--surface-elevated) 0%, var(--paper) 100%);
+    border-left: 3px solid var(--gold);
+    border-right: 1px solid var(--border-faint);
+    position: relative;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .review-block::before {
+    content: '"';
+    position: absolute;
+    top: -16px;
+    left: 1.5rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 5rem;
+    color: var(--gold-light);
+    line-height: 1;
+    background: var(--paper);
+    padding: 0 0.5rem;
+  }
+
+  .review-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  .review-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: var(--ink);
+    font-style: italic;
+  }
+
+  .review-text::first-letter {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem;
+    font-weight: 600;
+    color: var(--accent);
+    float: left;
+    line-height: 0.9;
+    margin: 0.15rem 0.5rem 0 0;
+    font-style: normal;
+    text-shadow: 0 2px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  .detail-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-soft);
+    margin-top: 2.5rem;
+    position: relative;
+  }
+
+  .detail-meta::before {
+    content: '✦';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface);
+    color: var(--gold);
+    padding: 0 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  .detail-date {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--ink-faint);
+    font-size: 1rem;
+  }
+
+  .detail-actions { display: flex; gap: 0.75rem; }
+
+  /* ───────────────── TOAST ───────────────── */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 1rem 2rem;
+    border-radius: 2px;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+    z-index: 200;
+    opacity: 0;
+    transition: all 0.3s ease;
+    border: 1px solid var(--gold);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ───────────────── FOOTER ───────────────── */
+  .footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--paper) 0%, var(--surface) 100%);
+    color: var(--ink-faint);
+    position: relative;
+  }
+
+  .footer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .footer-ornament {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.75rem;
+    font-style: italic;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .footer-ornament-line {
+    height: 1px;
+    width: 80px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .footer-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1rem;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 4rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--ink-faint);
+    font-size: 1.3rem;
+  }
+
+  .confirm-dialog {
+    background: var(--surface);
+    padding: 2.75rem 2.5rem;
+    max-width: 460px;
+    width: 100%;
+    text-align: center;
+    border: 1px solid var(--gold-light);
+    box-shadow: var(--shadow-deep);
+    position: relative;
+  }
+
+  .confirm-dialog::before {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    border: 1px dotted var(--gold-faint);
+    pointer-events: none;
+  }
+
+  .confirm-dialog h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.85rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+    font-style: italic;
+  }
+
+  .confirm-dialog p {
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--ink-soft);
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+
+  .confirm-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .has-tooltip { position: relative; }
+  .has-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 0.4rem 0.7rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    border-radius: 2px;
+  }
+
+  .has-tooltip:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Saving overlay */
+  .saving-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(43, 24, 16, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 150;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .saving-overlay.active { display: flex; }
+
+  .saving-box {
+    background: var(--surface);
+    padding: 2rem 3rem;
+    border: 1px solid var(--gold);
+    box-shadow: var(--shadow-deep);
+    text-align: center;
+  }
+
+  .saving-spinner {
+    width: 30px;
+    height: 30px;
+    margin: 0 auto 1rem;
+    border: 2px solid var(--gold-faint);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .saving-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 768px) {
+    .masthead { padding: 1rem 1.25rem 1.5rem; }
+    .masthead-top { flex-direction: column; gap: 0.5rem; text-align: center; }
+    .title-block { padding: 1rem 1rem 0.5rem; }
+    .title-block::before, .title-block::after, .corner-bl, .corner-br { width: 30px; height: 30px; }
+    .control-bar { padding: 0 1.25rem; grid-template-columns: 1fr; margin-top: 1.5rem; gap: 0.75rem; }
+    .stats-strip { gap: 1.5rem; padding: 1.25rem 1.5rem; flex-wrap: wrap; }
+    .stat:not(:last-child)::after { display: none; }
+    .sort-bar { padding: 0 1.25rem 1rem; flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .library { padding: 0 1.25rem; grid-template-columns: 1fr; }
+    .modal, .detail-card { padding: 2.5rem 1.5rem; }
+    .form-row { grid-template-columns: 1fr; }
+    .metrics-grid { grid-template-columns: 1fr; }
+    .detail-name { font-size: 2.25rem; }
+    .detail-metrics { grid-template-columns: 1fr; }
+    .pyramid-tier.top, .pyramid-tier.middle, .pyramid-tier.base { width: 100%; }
+    .pyramid { margin: 1.5rem 0; padding: 1.5rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="corner-ornament" viewBox="0 0 28 28">
+      <path d="M2 12 Q2 2, 12 2" stroke="currentColor" stroke-width="0.6" fill="none"/>
+      <path d="M5 10 Q5 5, 10 5" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.7"/>
+      <path d="M2 6 L8 2" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.6"/>
+      <circle cx="2" cy="2" r="1.2" fill="currentColor" opacity="0.6"/>
+      <circle cx="6" cy="6" r="0.6" fill="currentColor"/>
+      <path d="M11 4 Q14 3, 15 6" stroke="currentColor" stroke-width="0.4" fill="none" opacity="0.5"/>
+    </symbol>
+    <symbol id="detail-corner" viewBox="0 0 36 36">
+      <path d="M2 18 Q2 2, 18 2" stroke="currentColor" stroke-width="0.8" fill="none"/>
+      <path d="M6 14 Q6 6, 14 6" stroke="currentColor" stroke-width="0.6" fill="none" opacity="0.7"/>
+      <path d="M3 8 L10 2 M2 11 L11 11" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.6"/>
+      <circle cx="3" cy="3" r="1.5" fill="currentColor" opacity="0.7"/>
+      <circle cx="8" cy="8" r="1" fill="currentColor"/>
+      <path d="M15 5 Q19 3, 21 7 Q22 10, 18 11" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.6"/>
+      <circle cx="20" cy="9" r="0.8" fill="currentColor" opacity="0.5"/>
+      <path d="M5 16 Q3 20, 7 22" stroke="currentColor" stroke-width="0.5" fill="none" opacity="0.5"/>
+    </symbol>
+    <symbol id="fleuron" viewBox="0 0 40 20">
+      <path d="M20 4 Q24 8, 20 12 Q16 8, 20 4 Z" fill="currentColor" opacity="0.6"/>
+      <path d="M4 10 Q12 10, 18 6 M22 6 Q28 10, 36 10" stroke="currentColor" stroke-width="0.5" fill="none"/>
+      <path d="M4 10 Q12 10, 18 14 M22 14 Q28 10, 36 10" stroke="currentColor" stroke-width="0.5" fill="none"/>
+      <circle cx="20" cy="10" r="1.2" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="masthead">
+  <div class="masthead-top">
+    <span class="date" id="todayDate">—</span>
+    <span class="roman" id="romanYear">MMXXVI</span>
+    <span class="sync-indicator" id="syncIndicator"><span class="sync-dot"></span><span id="syncText">Initializing</span></span>
+    <span class="vol">Personal Archive · Vol. I</span>
+  </div>
+  <div class="title-block">
+    <span class="corner-bl"></span>
+    <span class="corner-br"></span>
+    <h1 class="brand-title">the<span class="dot">.</span>scent<span class="lib">librarian</span></h1>
+    <div class="ornament">
+      <span class="ornament-line"></span>
+      <svg width="40" height="20" style="color:var(--accent)"><use href="#fleuron"/></svg>
+      <span class="ornament-line"></span>
+    </div>
+    <p class="tagline">a curated chronicle of fragrances tried, worn, and remembered</p>
+  </div>
+</header>
+
+<!-- Setup banner shown when not configured -->
+<div class="setup-banner" id="setupBanner" style="display:none;">
+  <h3>Cloud Setup Required</h3>
+  <p>Edit this file and replace <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> at the top of the script with your Supabase project credentials. See the included <code>SETUP-GUIDE.md</code> for step-by-step instructions.</p>
+</div>
+
+<main>
+  <div class="control-bar">
+    <div class="search-wrapper">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search by brand, name, note, mood, anything…" autocomplete="off">
+    </div>
+    <button class="btn-icon btn has-tooltip" id="exportBtn" data-tooltip="Export backup" aria-label="Export">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+    </button>
+    <button class="btn-icon btn has-tooltip" id="importBtn" data-tooltip="Import backup" aria-label="Import">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+    </button>
+    <button class="btn" id="addBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Entry
+    </button>
+    <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+  </div>
+
+  <div class="stats-strip" id="statsStrip">
+    <div class="stat"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Entries</div></div>
+    <div class="stat"><div class="stat-num" id="statBrands">0</div><div class="stat-label">Brands</div></div>
+    <div class="stat"><div class="stat-num" id="statAvgRating">—</div><div class="stat-label">Avg. Rating</div></div>
+    <div class="stat"><div class="stat-num" id="statTopRated">—</div><div class="stat-label">Highest Rated</div></div>
+  </div>
+
+  <div class="sort-bar">
+    <div class="section-label">the collection <span class="count" id="resultsCount">— entries</span></div>
+    <select class="sort-select" id="sortSelect">
+      <option value="newest">Most Recent</option>
+      <option value="oldest">Oldest First</option>
+      <option value="brand">By Brand (A–Z)</option>
+      <option value="name">By Name (A–Z)</option>
+      <option value="rating">Highest Rated</option>
+      <option value="longevity">Longest Lasting</option>
+    </select>
+  </div>
+
+  <div id="libraryContainer">
+    <div class="loading">opening the cabinet…</div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="footer-ornament">
+    <span class="footer-ornament-line"></span>
+    <span>~ fin ~</span>
+    <span class="footer-ornament-line"></span>
+  </div>
+  <p class="footer-text">An olfactory diary, kept with care.</p>
+</footer>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="modal-header">
+      <div class="modal-eyebrow" id="modalEyebrow">New Entry</div>
+      <h2 class="modal-title">a new <span class="accent">scent</span>, observed</h2>
+    </div>
+
+    <form id="perfumeForm">
+      <input type="hidden" id="formId">
+
+      <div class="form-row">
+        <div class="form-field">
+          <label class="form-label" for="formBrand">Brand · Maison</label>
+          <input type="text" class="form-input" id="formBrand" required placeholder="e.g. Maison Francis Kurkdjian">
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="formName">Perfume Name</label>
+          <input type="text" class="form-input" id="formName" required placeholder="e.g. Baccarat Rouge 540">
+        </div>
+      </div>
+
+      <!-- Photo upload -->
+      <div class="form-field full" style="margin-bottom: 1rem;">
+        <label class="form-label">Photograph <span class="hint">a portrait of the bottle (optional)</span></label>
+        <div class="photo-upload-area" id="photoUploadArea">
+          <img id="photoPreview" class="photo-preview" style="display:none;" alt="">
+          <div id="photoUploadDefault">
+            <label for="formPhoto" class="photo-upload-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Upload Photo
+            </label>
+            <div class="photo-upload-hint">JPG, PNG, or WebP · max 5MB</div>
+          </div>
+          <button type="button" id="photoRemove" class="photo-remove-btn" style="display:none;">Remove Photo</button>
+          <input type="file" id="formPhoto" accept="image/*" style="display:none;">
+          <input type="hidden" id="formPhotoUrl">
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <div class="notes-section-header">
+          <div class="notes-section-title">the pyramid</div>
+          <div class="notes-section-sub">olfactory composition</div>
+        </div>
+
+        <div class="note-tier">
+          <div class="form-field">
+            <label class="form-label" for="formTopNotes"><span class="tier-marker">I</span>Top Notes <span class="hint">first impression, fleeting</span></label>
+            <input type="text" class="form-input" id="formTopNotes" placeholder="bergamot, pink pepper, mandarin…">
+          </div>
+        </div>
+
+        <div class="note-tier">
+          <div class="form-field">
+            <label class="form-label" for="formMiddleNotes"><span class="tier-marker">II</span>Middle Notes <span class="hint">the heart</span></label>
+            <input type="text" class="form-input" id="formMiddleNotes" placeholder="rose, jasmine, saffron…">
+          </div>
+        </div>
+
+        <div class="note-tier">
+          <div class="form-field">
+            <label class="form-label" for="formBaseNotes"><span class="tier-marker">III</span>Base Notes <span class="hint">the foundation, long-lasting</span></label>
+            <input type="text" class="form-input" id="formBaseNotes" placeholder="ambergris, oud, sandalwood…">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-field full" style="margin-bottom: 1rem;">
+        <label class="form-label">Performance</label>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-input">
+          <label>Projection</label>
+          <div class="metric-value-display"><span id="projVal">5</span><span class="max">/10</span></div>
+          <input type="range" class="metric-slider" id="formProjection" min="1" max="10" value="5">
+          <div class="metric-descriptor" id="projDesc">Moderate</div>
+        </div>
+        <div class="metric-input">
+          <label>Sillage</label>
+          <div class="metric-value-display"><span id="silVal">5</span><span class="max">/10</span></div>
+          <input type="range" class="metric-slider" id="formSillage" min="1" max="10" value="5">
+          <div class="metric-descriptor" id="silDesc">Moderate trail</div>
+        </div>
+        <div class="metric-input">
+          <label>Longevity</label>
+          <div class="metric-value-display"><span id="lonVal">5</span><span class="max">/10</span></div>
+          <input type="range" class="metric-slider" id="formLongevity" min="1" max="10" value="5">
+          <div class="metric-descriptor" id="lonDesc">5–7 hours</div>
+        </div>
+      </div>
+
+      <div class="form-field full" style="margin-bottom: 1.5rem;">
+        <label class="form-label">Overall Rating <span class="hint">your verdict</span></label>
+        <div class="metric-input rating-input" style="margin-top:0.25rem;">
+          <div class="metric-value-display"><span id="rateVal">7</span><span class="max">/10</span></div>
+          <input type="range" class="metric-slider" id="formRating" min="1" max="10" value="7">
+          <div class="metric-descriptor" id="rateDesc">Very good</div>
+        </div>
+      </div>
+
+      <div class="form-field full">
+        <label class="form-label" for="formReview">Personal Review <span class="hint">how does it feel, what does it evoke?</span></label>
+        <textarea class="form-textarea" id="formReview" placeholder="The first spray was unexpectedly soft — almost powdery — before settling into something resinous and warm. Reminds me of an old library in winter…"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="cancelBtn">Cancel</button>
+        <button type="submit" class="btn" id="saveBtn">Save to Library</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- DETAIL VIEW -->
+<div class="modal-overlay" id="detailOverlay">
+  <div class="detail-card" id="detailCard"></div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="modal-overlay" id="confirmOverlay">
+  <div class="confirm-dialog">
+    <h3>Remove this entry?</h3>
+    <p>This will permanently delete the entry from your library. This action cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" id="confirmCancel">Keep It</button>
+      <button class="btn btn-danger" id="confirmDelete">Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- Saving overlay -->
+<div class="saving-overlay" id="savingOverlay">
+  <div class="saving-box">
+    <div class="saving-spinner"></div>
+    <div class="saving-text" id="savingText">Saving to library…</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  ═══ KONFIGURASI SUPABASE ═══
+//  Ganti dua nilai di bawah dengan credentials Supabase Anda.
+//  Lihat SETUP-GUIDE.md untuk instruksi lengkap.
+// ════════════════════════════════════════════════════════════════
+
+const SUPABASE_URL = 'https://fzegglbxlyhpfndfrwoc.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY = 'sb_publishable_kM83bYmtLcSq2FfaW0cGRQ_s0mqrVSg';
+
+// ════════════════════════════════════════════════════════════════
+
+const BUCKET_NAME = 'perfume-photos';
+const TABLE_NAME = 'perfumes';
+const LOCAL_BACKUP_KEY = 'scentlibrarian:local-backup:v1';
+
+let supabase = null;
+let collection = [];
+let editingId = null;
+let pendingDeleteId = null;
+let currentPhotoFile = null;
+let currentPhotoUrl = null;
+let realtimeChannel = null;
+
+const PROJECTION_DESC = {
+  1: 'Skin scent', 2: 'Very intimate', 3: 'Subtle', 4: 'Soft',
+  5: 'Moderate', 6: 'Noticeable', 7: 'Strong', 8: 'Powerful',
+  9: 'Projects a room', 10: 'Beast mode'
+};
+const SILLAGE_DESC = {
+  1: 'No trail', 2: 'Minimal', 3: 'Light wake', 4: 'Soft trail',
+  5: 'Moderate trail', 6: 'Distinct trail', 7: 'Heavy trail', 8: 'Heavy & long',
+  9: 'Enveloping', 10: 'Fills the air'
+};
+const LONGEVITY_DESC = {
+  1: '< 1 hour', 2: '1–2 hours', 3: '2–3 hours', 4: '3–5 hours',
+  5: '5–7 hours', 6: '7–9 hours', 7: '9–12 hours', 8: '12–16 hours',
+  9: '16–24 hours', 10: 'Eternal'
+};
+const RATING_DESC = {
+  1: 'Disliked', 2: 'Poor', 3: 'Underwhelming', 4: 'Average',
+  5: 'Decent', 6: 'Good', 7: 'Very good', 8: 'Excellent',
+  9: 'Outstanding', 10: 'A masterpiece'
+};
+
+// ═══ DATA NORMALIZATION ═══
+// Database uses snake_case, frontend uses camelCase. Convert between them.
+function fromDb(row) {
+  return {
+    id: row.id,
+    brand: row.brand,
+    name: row.name,
+    topNotes: row.top_notes || '',
+    middleNotes: row.middle_notes || '',
+    baseNotes: row.base_notes || '',
+    projection: row.projection || 5,
+    sillage: row.sillage || 5,
+    longevity: row.longevity || 5,
+    rating: row.rating || 7,
+    review: row.review || '',
+    photoUrl: row.photo_url || '',
+    dateAdded: row.date_added,
+    dateUpdated: row.date_updated
+  };
+}
+
+function toDb(p) {
+  return {
+    id: p.id,
+    brand: p.brand,
+    name: p.name,
+    top_notes: p.topNotes || '',
+    middle_notes: p.middleNotes || '',
+    base_notes: p.baseNotes || '',
+    projection: p.projection,
+    sillage: p.sillage,
+    longevity: p.longevity,
+    rating: p.rating,
+    review: p.review || '',
+    photo_url: p.photoUrl || null,
+    date_added: p.dateAdded,
+    date_updated: p.dateUpdated
+  };
+}
+
+// ═══ SUPABASE LAYER ═══
+const Cloud = {
+  configured() {
+    return SUPABASE_URL &&
+           SUPABASE_ANON_KEY &&
+           !SUPABASE_URL.includes('PASTE_') &&
+           !SUPABASE_ANON_KEY.includes('PASTE_');
+  },
+
+  init() {
+    if (!this.configured()) return false;
+    try {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      return true;
+    } catch (e) {
+      console.error('Failed to init Supabase:', e);
+      return false;
+    }
+  },
+
+  async fetchAll() {
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .select('*')
+      .order('date_added', { ascending: false });
+    if (error) throw error;
+    return (data || []).map(fromDb);
+  },
+
+  async upsert(perfume) {
+    const { data, error } = await supabase
+      .from(TABLE_NAME)
+      .upsert(toDb(perfume))
+      .select()
+      .single();
+    if (error) throw error;
+    return fromDb(data);
+  },
+
+  async remove(id) {
+    const { error } = await supabase.from(TABLE_NAME).delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  async uploadPhoto(file, perfumeId) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    const path = `${perfumeId}-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+    if (error) throw error;
+    const { data: urlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(path);
+    return urlData.publicUrl;
+  },
+
+  async deletePhoto(photoUrl) {
+    if (!photoUrl) return;
+    // Extract filename from public URL
+    const match = photoUrl.match(/\/perfume-photos\/(.+)$/);
+    if (!match) return;
+    const path = match[1];
+    await supabase.storage.from(BUCKET_NAME).remove([path]);
+  },
+
+  subscribeToChanges(onChange) {
+    realtimeChannel = supabase
+      .channel('perfumes-changes')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: TABLE_NAME },
+        (payload) => onChange(payload)
+      )
+      .subscribe((status) => {
+        setSyncStatus(status === 'SUBSCRIBED' ? 'connected' : 'syncing');
+      });
+  }
+};
+
+// ═══ SYNC STATUS ═══
+function setSyncStatus(state, text) {
+  const indicator = document.getElementById('syncIndicator');
+  const textEl = document.getElementById('syncText');
+  indicator.classList.remove('connected', 'syncing', 'error');
+  if (state) indicator.classList.add(state);
+  const labels = {
+    connected: 'Synced',
+    syncing: 'Syncing…',
+    error: 'Offline',
+    'local-only': 'Local Only'
+  };
+  textEl.textContent = text || labels[state] || state;
+}
+
+// ═══ INIT ═══
+async function init() {
+  setTodayDate();
+  bindEvents();
+
+  if (!Cloud.configured()) {
+    document.getElementById('setupBanner').style.display = 'block';
+    setSyncStatus('error', 'Not Configured');
+    document.getElementById('libraryContainer').innerHTML =
+      '<div class="empty-state"><div class="empty-state-frame"></div><div class="empty-state-mark">✦</div><h2>Awaiting cloud connection</h2><p>Please configure your Supabase credentials at the top of the HTML file. See SETUP-GUIDE.md for instructions.</p></div>';
+    return;
+  }
+
+  if (!Cloud.init()) {
+    setSyncStatus('error', 'Init Failed');
+    showToast('Could not connect to cloud database');
+    return;
+  }
+
+  setSyncStatus('syncing', 'Loading…');
+
+  try {
+    collection = await Cloud.fetchAll();
+    setSyncStatus('connected');
+    render();
+
+    Cloud.subscribeToChanges((payload) => {
+      handleRealtimeChange(payload);
+    });
+
+    // Cache locally for offline read
+    try { localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(collection)); } catch (e) {}
+  } catch (e) {
+    console.error('Failed to fetch:', e);
+    setSyncStatus('error');
+
+    // Try to load from local cache as fallback
+    try {
+      const cached = localStorage.getItem(LOCAL_BACKUP_KEY);
+      if (cached) {
+        collection = JSON.parse(cached);
+        showToast('Offline mode — showing cached data');
+        render();
+      } else {
+        showToast('Connection failed — check console');
+      }
+    } catch (err) {
+      showToast('Connection failed');
+    }
+  }
+}
+
+function handleRealtimeChange(payload) {
+  const { eventType, new: newRow, old: oldRow } = payload;
+
+  if (eventType === 'INSERT') {
+    const item = fromDb(newRow);
+    if (!collection.find(x => x.id === item.id)) {
+      collection.unshift(item);
+    }
+  } else if (eventType === 'UPDATE') {
+    const item = fromDb(newRow);
+    const idx = collection.findIndex(x => x.id === item.id);
+    if (idx !== -1) collection[idx] = item;
+  } else if (eventType === 'DELETE') {
+    collection = collection.filter(x => x.id !== oldRow.id);
+  }
+
+  try { localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(collection)); } catch (e) {}
+  render();
+}
+
+function setTodayDate() {
+  const d = new Date();
+  document.getElementById('todayDate').textContent = d.toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
+  document.getElementById('romanYear').textContent = toRoman(d.getFullYear());
+}
+
+function toRoman(num) {
+  const romans = [
+    [1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'],
+    [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'],
+    [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']
+  ];
+  let result = '';
+  for (const [val, sym] of romans) {
+    while (num >= val) { result += sym; num -= val; }
+  }
+  return result;
+}
+
+// ═══ EVENT BINDINGS ═══
+function bindEvents() {
+  document.getElementById('addBtn').addEventListener('click', openAddModal);
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+  document.getElementById('perfumeForm').addEventListener('submit', handleFormSubmit);
+  document.getElementById('searchInput').addEventListener('input', debounce(render, 150));
+  document.getElementById('sortSelect').addEventListener('change', render);
+  document.getElementById('exportBtn').addEventListener('click', exportData);
+  document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change', importData);
+  document.getElementById('formPhoto').addEventListener('change', handlePhotoSelect);
+  document.getElementById('photoRemove').addEventListener('click', removePhoto);
+
+  bindSlider('formProjection', 'projVal', 'projDesc', PROJECTION_DESC);
+  bindSlider('formSillage', 'silVal', 'silDesc', SILLAGE_DESC);
+  bindSlider('formLongevity', 'lonVal', 'lonDesc', LONGEVITY_DESC);
+  bindSlider('formRating', 'rateVal', 'rateDesc', RATING_DESC);
+
+  document.getElementById('detailOverlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeDetail();
+  });
+
+  document.getElementById('confirmOverlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeConfirm();
+  });
+  document.getElementById('confirmCancel').addEventListener('click', closeConfirm);
+  document.getElementById('confirmDelete').addEventListener('click', confirmDelete);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeModal(); closeDetail(); closeConfirm();
+    }
+  });
+}
+
+function bindSlider(sliderId, valId, descId, descMap) {
+  const slider = document.getElementById(sliderId);
+  slider.addEventListener('input', (e) => {
+    const v = e.target.value;
+    document.getElementById(valId).textContent = v;
+    document.getElementById(descId).textContent = descMap[v];
+  });
+}
+
+// ═══ PHOTO HANDLING ═══
+function handlePhotoSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('Photo must be under 5MB');
+    e.target.value = '';
+    return;
+  }
+
+  if (!file.type.startsWith('image/')) {
+    showToast('Please select an image file');
+    e.target.value = '';
+    return;
+  }
+
+  currentPhotoFile = file;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    showPhotoPreview(ev.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+function showPhotoPreview(url) {
+  const preview = document.getElementById('photoPreview');
+  preview.src = url;
+  preview.style.display = 'block';
+  document.getElementById('photoUploadDefault').style.display = 'none';
+  document.getElementById('photoRemove').style.display = 'inline-block';
+  document.getElementById('photoUploadArea').classList.add('has-image');
+}
+
+function removePhoto() {
+  currentPhotoFile = null;
+  currentPhotoUrl = null;
+  document.getElementById('formPhoto').value = '';
+  document.getElementById('formPhotoUrl').value = '';
+  document.getElementById('photoPreview').style.display = 'none';
+  document.getElementById('photoPreview').src = '';
+  document.getElementById('photoUploadDefault').style.display = 'block';
+  document.getElementById('photoRemove').style.display = 'none';
+  document.getElementById('photoUploadArea').classList.remove('has-image');
+}
+
+// ═══ MODAL HANDLING ═══
+function openAddModal() {
+  editingId = null;
+  currentPhotoFile = null;
+  currentPhotoUrl = null;
+  document.getElementById('modalEyebrow').textContent = 'New Entry';
+  document.querySelector('.modal-title').innerHTML = 'a new <span class="accent">scent</span>, observed';
+  document.getElementById('perfumeForm').reset();
+  document.getElementById('formId').value = '';
+  document.getElementById('formPhotoUrl').value = '';
+  removePhoto();
+
+  ['Projection', 'Sillage', 'Longevity'].forEach(m => {
+    const slider = document.getElementById('form' + m);
+    slider.value = 5;
+    slider.dispatchEvent(new Event('input'));
+  });
+  const ratingSlider = document.getElementById('formRating');
+  ratingSlider.value = 7;
+  ratingSlider.dispatchEvent(new Event('input'));
+
+  document.getElementById('modalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('formBrand').focus(), 300);
+}
+
+function openEditModal(id) {
+  const p = collection.find(x => x.id === id);
+  if (!p) return;
+
+  editingId = id;
+  currentPhotoFile = null;
+  currentPhotoUrl = p.photoUrl || null;
+  document.getElementById('modalEyebrow').textContent = 'Editing Entry';
+  document.querySelector('.modal-title').innerHTML = 'refining the <span class="accent">memory</span>';
+
+  document.getElementById('formId').value = p.id;
+  document.getElementById('formBrand').value = p.brand;
+  document.getElementById('formName').value = p.name;
+  document.getElementById('formTopNotes').value = p.topNotes || '';
+  document.getElementById('formMiddleNotes').value = p.middleNotes || '';
+  document.getElementById('formBaseNotes').value = p.baseNotes || '';
+  document.getElementById('formReview').value = p.review || '';
+  document.getElementById('formPhotoUrl').value = p.photoUrl || '';
+
+  if (p.photoUrl) {
+    showPhotoPreview(p.photoUrl);
+  } else {
+    removePhoto();
+  }
+
+  const setSlider = (id, val) => {
+    const s = document.getElementById(id);
+    s.value = val;
+    s.dispatchEvent(new Event('input'));
+  };
+  setSlider('formProjection', p.projection || 5);
+  setSlider('formSillage', p.sillage || 5);
+  setSlider('formLongevity', p.longevity || 5);
+  setSlider('formRating', p.rating || 7);
+
+  closeDetail();
+  document.getElementById('modalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+  editingId = null;
+}
+
+function showSaving(text) {
+  document.getElementById('savingText').textContent = text || 'Saving to library…';
+  document.getElementById('savingOverlay').classList.add('active');
+}
+
+function hideSaving() {
+  document.getElementById('savingOverlay').classList.remove('active');
+}
+
+// ═══ FORM SUBMIT ═══
+async function handleFormSubmit(e) {
+  e.preventDefault();
+
+  const brand = document.getElementById('formBrand').value.trim();
+  const name = document.getElementById('formName').value.trim();
+
+  if (!brand || !name) {
+    showToast('Brand and name are required');
+    return;
+  }
+
+  const id = editingId || generateId();
+  const existing = editingId ? collection.find(x => x.id === editingId) : null;
+  const existingPhotoUrl = existing?.photoUrl || null;
+
+  let photoUrl = currentPhotoUrl || '';
+
+  showSaving();
+
+  try {
+    // Upload photo if new file selected
+    if (currentPhotoFile) {
+      document.getElementById('savingText').textContent = 'Uploading photo…';
+      photoUrl = await Cloud.uploadPhoto(currentPhotoFile, id);
+
+      // Delete old photo if replacing
+      if (existingPhotoUrl && existingPhotoUrl !== photoUrl) {
+        Cloud.deletePhoto(existingPhotoUrl).catch(() => {}); // non-blocking
+      }
+    } else if (!photoUrl && existingPhotoUrl) {
+      // Photo was removed
+      Cloud.deletePhoto(existingPhotoUrl).catch(() => {});
+    }
+
+    document.getElementById('savingText').textContent = 'Saving to library…';
+
+    const data = {
+      id,
+      brand, name,
+      topNotes: document.getElementById('formTopNotes').value.trim(),
+      middleNotes: document.getElementById('formMiddleNotes').value.trim(),
+      baseNotes: document.getElementById('formBaseNotes').value.trim(),
+      projection: parseInt(document.getElementById('formProjection').value),
+      sillage: parseInt(document.getElementById('formSillage').value),
+      longevity: parseInt(document.getElementById('formLongevity').value),
+      rating: parseInt(document.getElementById('formRating').value),
+      review: document.getElementById('formReview').value.trim(),
+      photoUrl,
+      dateAdded: existing ? existing.dateAdded : new Date().toISOString(),
+      dateUpdated: new Date().toISOString()
+    };
+
+    const saved = await Cloud.upsert(data);
+
+    // Update local state (realtime will also fire, but this makes UI feel instant)
+    const idx = collection.findIndex(x => x.id === saved.id);
+    if (idx !== -1) {
+      collection[idx] = saved;
+    } else {
+      collection.unshift(saved);
+    }
+
+    hideSaving();
+    closeModal();
+    render();
+    showToast(editingId ? 'Entry updated' : 'Added to your library');
+  } catch (err) {
+    hideSaving();
+    console.error('Save failed:', err);
+    showToast('Save failed — ' + (err.message || 'check connection'));
+  }
+}
+
+// ═══ DELETE FLOW ═══
+function requestDelete(id) {
+  pendingDeleteId = id;
+  closeDetail();
+  document.getElementById('confirmOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+  pendingDeleteId = null;
+}
+
+async function confirmDelete() {
+  if (!pendingDeleteId) return;
+  const id = pendingDeleteId;
+  const item = collection.find(x => x.id === id);
+
+  closeConfirm();
+  showSaving('Removing entry…');
+
+  try {
+    if (item?.photoUrl) {
+      Cloud.deletePhoto(item.photoUrl).catch(() => {}); // non-blocking
+    }
+    await Cloud.remove(id);
+    collection = collection.filter(x => x.id !== id);
+    hideSaving();
+    render();
+    showToast('Entry removed');
+  } catch (err) {
+    hideSaving();
+    console.error('Delete failed:', err);
+    showToast('Delete failed');
+  }
+}
+
+// ═══ EXPORT / IMPORT ═══
+function exportData() {
+  if (collection.length === 0) {
+    showToast('Nothing to export yet');
+    return;
+  }
+  const payload = {
+    app: 'the.scentlibrarian',
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    collection
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `scentlibrarian-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Backup downloaded');
+}
+
+async function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async (event) => {
+    try {
+      const data = JSON.parse(event.target.result);
+      const entries = Array.isArray(data) ? data : (data.collection || []);
+      if (!Array.isArray(entries)) throw new Error('Invalid format');
+
+      showSaving(`Importing ${entries.length} entries…`);
+
+      const existingIds = new Set(collection.map(p => p.id));
+      let added = 0;
+
+      for (const p of entries) {
+        if (!p || !p.brand || !p.name) continue;
+        if (!p.id) p.id = generateId();
+        if (existingIds.has(p.id)) continue;
+
+        try {
+          const saved = await Cloud.upsert({
+            ...p,
+            dateAdded: p.dateAdded || new Date().toISOString(),
+            dateUpdated: new Date().toISOString()
+          });
+          collection.unshift(saved);
+          existingIds.add(saved.id);
+          added++;
+        } catch (err) {
+          console.warn('Skipped entry:', p, err);
+        }
+      }
+
+      collection.sort((a, b) => new Date(b.dateAdded || 0) - new Date(a.dateAdded || 0));
+      hideSaving();
+      render();
+      showToast(`Imported ${added} ${added === 1 ? 'entry' : 'entries'}`);
+    } catch (err) {
+      hideSaving();
+      console.error(err);
+      showToast('Invalid backup file');
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ═══ DETAIL VIEW ═══
+function openDetail(id) {
+  const p = collection.find(x => x.id === id);
+  if (!p) return;
+
+  const dateStr = new Date(p.dateAdded).toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  document.getElementById('detailCard').innerHTML = `
+    <svg class="detail-corner tl" aria-hidden="true"><use href="#detail-corner"/></svg>
+    <svg class="detail-corner tr" aria-hidden="true"><use href="#detail-corner"/></svg>
+    <svg class="detail-corner bl" aria-hidden="true"><use href="#detail-corner"/></svg>
+    <svg class="detail-corner br" aria-hidden="true"><use href="#detail-corner"/></svg>
+
+    <button class="detail-close" onclick="closeDetail()" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <div class="detail-eyebrow">Entry № ${getEntryNumber(p.id)}</div>
+    <div class="detail-brand">${escapeHtml(p.brand)}</div>
+    <h2 class="detail-name">${escapeHtml(p.name)}</h2>
+
+    <div class="detail-ornament">
+      <span class="detail-ornament-line"></span>
+      <svg width="40" height="20" style="color:var(--gold)"><use href="#fleuron"/></svg>
+      <span class="detail-ornament-line"></span>
+    </div>
+
+    ${p.photoUrl ? `<img src="${escapeHtml(p.photoUrl)}" class="detail-photo" alt="${escapeHtml(p.name)}">` : ''}
+
+    ${(p.topNotes || p.middleNotes || p.baseNotes) ? `
+    <div class="pyramid">
+      <div class="pyramid-header">
+        <div class="pyramid-title">the olfactory pyramid</div>
+        <div class="pyramid-sub">composition</div>
+      </div>
+      <div class="pyramid-shape">
+        ${p.topNotes ? `
+          <div class="pyramid-tier top">
+            <div class="tier-label">I · Top Notes</div>
+            <div class="tier-notes">${escapeHtml(p.topNotes)}</div>
+          </div>` : ''}
+        ${p.middleNotes ? `
+          <div class="pyramid-tier middle">
+            <div class="tier-label">II · Heart Notes</div>
+            <div class="tier-notes">${escapeHtml(p.middleNotes)}</div>
+          </div>` : ''}
+        ${p.baseNotes ? `
+          <div class="pyramid-tier base">
+            <div class="tier-label">III · Base Notes</div>
+            <div class="tier-notes">${escapeHtml(p.baseNotes)}</div>
+          </div>` : ''}
+      </div>
+    </div>` : ''}
+
+    <div class="detail-metrics">
+      <div class="detail-metric">
+        <div class="detail-metric-num">${p.projection}<span class="out-of">/10</span></div>
+        <div class="detail-metric-label">Projection</div>
+        <div class="detail-metric-desc">${PROJECTION_DESC[p.projection]}</div>
+      </div>
+      <div class="detail-metric">
+        <div class="detail-metric-num">${p.sillage}<span class="out-of">/10</span></div>
+        <div class="detail-metric-label">Sillage</div>
+        <div class="detail-metric-desc">${SILLAGE_DESC[p.sillage]}</div>
+      </div>
+      <div class="detail-metric">
+        <div class="detail-metric-num">${p.longevity}<span class="out-of">/10</span></div>
+        <div class="detail-metric-label">Longevity</div>
+        <div class="detail-metric-desc">${LONGEVITY_DESC[p.longevity]}</div>
+      </div>
+    </div>
+
+    <div class="rating-hero">
+      ${renderWaxSeal(p.rating, 90, 'auto')}
+      <div class="rating-hero-label">Overall Verdict</div>
+      <div class="rating-hero-desc">${RATING_DESC[p.rating]}</div>
+    </div>
+
+    ${p.review ? `
+    <div class="review-block">
+      <div class="review-eyebrow">— The Review —</div>
+      <div class="review-text">${escapeHtml(p.review).replace(/\n/g, '<br>')}</div>
+    </div>` : ''}
+
+    <div class="detail-meta">
+      <div class="detail-date">Catalogued ${dateStr}</div>
+      <div class="detail-actions">
+        <button class="btn btn-ghost" onclick="openEditModal('${p.id}')">Edit</button>
+        <button class="btn btn-danger" onclick="requestDelete('${p.id}')">Remove</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('detailOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function renderWaxSeal(rating, size = 60, mode = 'card') {
+  const fontSize = size * 0.42;
+  const positioning = mode === 'auto'
+    ? `position: relative; display: block; margin: 0 auto 0.5rem;`
+    : '';
+  return `
+    <svg ${mode === 'card' ? 'class="wax-seal"' : ''} width="${size}" height="${size}" viewBox="0 0 60 60" style="${positioning}">
+      <defs>
+        <radialGradient id="wax-${size}-${rating}-${Math.random().toString(36).slice(2,6)}">
+          <stop offset="0%" stop-color="#8b2c2c"/>
+          <stop offset="60%" stop-color="#6b2c2c"/>
+          <stop offset="100%" stop-color="#4a1f1f"/>
+        </radialGradient>
+      </defs>
+      <circle cx="30" cy="30" r="27" fill="#6b2c2c"/>
+      <circle cx="30" cy="30" r="27" fill="none" stroke="#4a1f1f" stroke-width="1.5"/>
+      <circle cx="30" cy="30" r="23" fill="none" stroke="#c4a373" stroke-width="0.5" stroke-dasharray="2 1.5" opacity="0.8"/>
+      <circle cx="30" cy="30" r="20" fill="none" stroke="#c4a373" stroke-width="0.3" opacity="0.4"/>
+      <ellipse cx="22" cy="22" rx="8" ry="4" fill="white" opacity="0.12"/>
+      <text x="30" y="30" text-anchor="middle" dominant-baseline="central" font-family="Cormorant Garamond, serif" font-size="${fontSize}" font-weight="600" font-style="italic" fill="#d4b896">${rating}</text>
+    </svg>
+  `;
+}
+
+// ═══ RENDERING ═══
+function render() {
+  renderStats();
+  renderLibrary();
+}
+
+function renderStats() {
+  const total = collection.length;
+  const uniqueBrands = new Set(collection.map(p => p.brand.toLowerCase())).size;
+  const avg = total > 0
+    ? (collection.reduce((s, p) => s + (p.rating || 0), 0) / total).toFixed(1)
+    : '—';
+  const top = total > 0
+    ? collection.reduce((best, p) => (p.rating > (best?.rating || 0) ? p : best), null)
+    : null;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statBrands').textContent = uniqueBrands;
+  document.getElementById('statAvgRating').textContent = avg;
+  document.getElementById('statTopRated').textContent = top
+    ? (top.name.length > 16 ? top.name.slice(0, 14) + '…' : top.name)
+    : '—';
+}
+
+function renderLibrary() {
+  const container = document.getElementById('libraryContainer');
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  const sortBy = document.getElementById('sortSelect').value;
+
+  let filtered = [...collection];
+
+  if (query) {
+    filtered = filtered.filter(p => {
+      const haystack = [
+        p.brand, p.name, p.topNotes, p.middleNotes, p.baseNotes, p.review,
+        PROJECTION_DESC[p.projection], SILLAGE_DESC[p.sillage],
+        LONGEVITY_DESC[p.longevity], RATING_DESC[p.rating]
+      ].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(query);
+    });
+  }
+
+  filtered.sort((a, b) => {
+    switch (sortBy) {
+      case 'oldest': return new Date(a.dateAdded) - new Date(b.dateAdded);
+      case 'brand': return a.brand.localeCompare(b.brand);
+      case 'name': return a.name.localeCompare(b.name);
+      case 'rating': return (b.rating || 0) - (a.rating || 0);
+      case 'longevity': return (b.longevity || 0) - (a.longevity || 0);
+      case 'newest':
+      default: return new Date(b.dateAdded) - new Date(a.dateAdded);
+    }
+  });
+
+  document.getElementById('resultsCount').textContent =
+    `${filtered.length} ${filtered.length === 1 ? 'entry' : 'entries'}${query ? ' found' : ''}`;
+
+  if (collection.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-frame"></div>
+        <div class="empty-state-mark">❦</div>
+        <h2>Your library awaits</h2>
+        <p>Every perfume tells a story — the first spray, the dry-down, the moments it accompanied you. Begin your archive by cataloguing your first scent.</p>
+        <button class="btn" onclick="document.getElementById('addBtn').click()">
+          Catalogue Your First Entry
+        </button>
+      </div>`;
+    return;
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-frame"></div>
+        <div class="empty-state-mark">∅</div>
+        <h2>Nothing matches</h2>
+        <p>No entries in your collection match "${escapeHtml(query)}". Try a different note, brand, or descriptor.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="library">${filtered.map(p => cardHTML(p)).join('')}</div>`;
+
+  container.querySelectorAll('.perfume-card').forEach(card => {
+    card.addEventListener('click', () => openDetail(card.dataset.id));
+  });
+}
+
+function cardHTML(p) {
+  const allNotes = [p.topNotes, p.middleNotes, p.baseNotes].filter(Boolean).join(' · ');
+  const entryNum = getEntryNumber(p.id);
+  const hasPhoto = !!p.photoUrl;
+
+  return `
+    <article class="perfume-card ${hasPhoto ? 'has-photo' : 'no-photo'}" data-id="${p.id}">
+      ${hasPhoto ? `
+        <div class="card-photo">
+          <img src="${escapeHtml(p.photoUrl)}" alt="${escapeHtml(p.name)}" loading="lazy">
+        </div>
+      ` : ''}
+      <div class="card-body">
+        <svg class="card-corner tl" aria-hidden="true"><use href="#corner-ornament"/></svg>
+        <svg class="card-corner tr" aria-hidden="true"><use href="#corner-ornament"/></svg>
+        <svg class="card-corner bl" aria-hidden="true"><use href="#corner-ornament"/></svg>
+        <svg class="card-corner br" aria-hidden="true"><use href="#corner-ornament"/></svg>
+        ${renderWaxSeal(p.rating, 60)}
+
+        <div class="card-index">№ ${entryNum}</div>
+        <div class="card-brand">${escapeHtml(p.brand)}</div>
+        <h3 class="card-name">${escapeHtml(p.name)}</h3>
+        <div class="card-divider">
+          <span class="card-divider-mark">⚜</span>
+        </div>
+
+        <p class="card-notes-mini">${allNotes ? escapeHtml(allNotes) : 'No notes recorded'}</p>
+
+        <div class="card-metrics">
+          <div class="metric-mini">
+            <div class="metric-mini-num">${p.projection}<span class="total">/10</span></div>
+            <div class="metric-mini-label">Proj</div>
+          </div>
+          <div class="metric-mini">
+            <div class="metric-mini-num">${p.sillage}<span class="total">/10</span></div>
+            <div class="metric-mini-label">Sill</div>
+          </div>
+          <div class="metric-mini">
+            <div class="metric-mini-num">${p.longevity}<span class="total">/10</span></div>
+            <div class="metric-mini-label">Long</div>
+          </div>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+// ═══ UTILITIES ═══
+function generateId() {
+  return 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+}
+
+function getEntryNumber(id) {
+  const sorted = [...collection].sort((a, b) => new Date(a.dateAdded) - new Date(b.dateAdded));
+  const idx = sorted.findIndex(p => p.id === id);
+  return String(idx + 1).padStart(3, '0');
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function debounce(fn, ms) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+
+function showToast(msg, duration = 2800) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+window.openEditModal = openEditModal;
+window.requestDelete = requestDelete;
+window.closeDetail = closeDetail;
+
+init();
+</script>
+</body>
+</html>
